@@ -74,6 +74,8 @@ RecorderUI.prototype.set_started = function() {
   e.style.display = 'none';
   e = document.getElementById("bdoc");
   e.style.display = 'none';
+  e = document.getElementById("bsel");
+  e.style.display = 'none';
 }
 
 RecorderUI.prototype.stop = function() {
@@ -91,8 +93,8 @@ RecorderUI.prototype.set_stopped = function() {
 	e.style.display = 'none';
 	e = document.getElementById("bexport");
 	e.style.display = '';
-    e = document.getElementById("bdoc");
-    e.style.display = '';
+  e = document.getElementById("bsel");
+  e.style.display = '';
 }
 RecorderUI.prototype.goto = function(targeturl) {
 	chrome.tabs.getSelected(null, function(tab) {
@@ -132,6 +134,9 @@ RecorderUI.prototype.export = function(bexport) {
 RecorderUI.prototype.exportdoc = function(bexport) {
     chrome.tabs.create({url: "./doc.html"});
 }
+RecorderUI.prototype.exportsel = function(bexport) {
+    chrome.tabs.create({url: "./selenium.html"});
+}
 
 var ui;
 
@@ -142,6 +147,7 @@ window.onload = function(){
     document.querySelector('input#bcomment').onclick=function() {ui.showcomment(); return false;};
     document.querySelector('input#bexport').onclick=function() {ui.export(); return false;};
     document.querySelector('input#bdoc').onclick=function() {ui.exportdoc(); return false;};
+    document.querySelector('input#bsel').onclick=function() {ui.exportsel(); return false;};
     document.querySelector('input#bsavecomment').onclick=function() {ui.hidecomment(true); return false;};
     document.querySelector('input#bcancelcomment').onclick=function() {ui.hidecomment(false); return false;};
     document.querySelector('#tagline').onclick=function() {this.innerText='Omne phantasma resurrectionem suam promit.'};
