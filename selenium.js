@@ -97,12 +97,13 @@ SeleniumRenderer.prototype.render = function() {
   this.document.open();
   this.document.write("<" + "pre" + ">");
   this.writeHeader();
-debugger;
+  // Uncomment this to hava a raw json dump of the current session in console
+  // console.log(JSON.stringify(this.items));
   for (var i=0; i < this.items.length; i++) {
     var item = this.items[i];
     if (item.type == etypes.Comment)
       this.space();
-    
+
     if(i===0) {
         if(item.type!=etypes.OpenUrl) {
             this.text("ERROR: the recorded sequence does not start with a url openning.");
@@ -114,7 +115,7 @@ debugger;
     if(i>1) {
         var before = this.items[i-1];
         // we do not want click due to user checking actions
-        if(item.type==etypes.Click && 
+        if(item.type==etypes.Click &&
                 ((before.type>=etypes.CheckPageTitle && before.type<=etypes.CheckImageSrc) || before.type==etypes.ScreenShot)) {
             continue;
         }
@@ -179,7 +180,7 @@ SeleniumRenderer.prototype.shortUrl = function(url) {
 SeleniumRenderer.prototype.startUrl = function(item) {
   var url = this.pyrepr(this.rewriteUrl(item.url));
   this.stmt("selenium.options.viewportSize = {width: "+item.width+", height: "+item.height+"};");
-  this.stmt("selenium.start(" + url + ");");        
+  this.stmt("selenium.start(" + url + ");");
 }
 SeleniumRenderer.prototype.openUrl = function(item) {
 
@@ -223,7 +224,7 @@ SeleniumRenderer.prototype.getSelector = function(item) {
 
   return selector;
 }
-    
+
 SeleniumRenderer.prototype.getSelectorXPath = function(item) {
   var type = item.info.type;
   var way;
@@ -249,7 +250,7 @@ SeleniumRenderer.prototype.getLinkXPath = function(item) {
     way = '@href=' + this.pyrepr(this.shortUrl(item.info.href));
   else if (item.info.title)
     way = 'title='+this.pyrepr(this.normalizeWhitespace(item.info.title));
-  else 
+  else
     way = 'TODO';
 
   return way;

@@ -1,0 +1,194 @@
+[{
+    "type": 0,
+    "url": "http://127.0.0.1:8080/Plone",
+    "width": 1366,
+    "height": 625
+}, {
+    "type": 19,
+    "info": {
+        "href": "http://127.0.0.1:8080/Plone/login",
+        "tagName": "A",
+        "name": "",
+        "type": "",
+        "id": "personaltools-login",
+        "title": "",
+        "options": []
+    },
+    "x": 1305,
+    "y": 15,
+    "text": "Log in"
+}, {
+    "type": 20,
+    "info": {
+        "href": "http://127.0.0.1:8080/Plone/login",
+        "tagName": "A",
+        "name": "",
+        "type": "",
+        "id": "personaltools-login",
+        "title": "",
+        "options": []
+    },
+    "x": 1305,
+    "y": 15,
+    "text": "Log in"
+}, {
+    "type": 12,
+    "info": {
+        "tagName": "INPUT",
+        "value": "",
+        "checked": false,
+        "name": "__ac_name",
+        "type": "text",
+        "form": {
+            "id": "login_form",
+            "name": ""
+        },
+        "src": "",
+        "id": "__ac_name",
+        "title": "",
+        "options": [],
+        "label": "Login Name"
+    },
+    "text": ""
+}, {
+    "type": 1,
+    "info": {
+        "tagName": "DIV",
+        "id": "",
+        "title": "",
+        "options": []
+    },
+    "x": 718,
+    "y": 168,
+    "text": "Check Enabled"
+}, {
+    "type": 20,
+    "info": {
+        "tagName": "INPUT",
+        "value": "",
+        "checked": false,
+        "name": "__ac_name",
+        "type": "text",
+        "form": {
+            "id": "login_form",
+            "name": ""
+        },
+        "src": "",
+        "id": "__ac_name",
+        "title": "",
+        "options": [],
+        "label": "Login Name"
+    },
+    "x": 757,
+    "y": 109,
+    "text": ""
+}, {
+    "type": 1,
+    "info": {
+        "tagName": "INPUT",
+        "value": "",
+        "checked": false,
+        "name": "__ac_name",
+        "type": "text",
+        "form": {
+            "id": "login_form",
+            "name": ""
+        },
+        "src": "",
+        "id": "__ac_name",
+        "title": "",
+        "options": [],
+        "label": "Login Name"
+    },
+    "x": 757,
+    "y": 109,
+    "text": ""
+}, {
+    "type": 2,
+    "info": {
+        "tagName": "INPUT",
+        "value": "user",
+        "checked": false,
+        "name": "__ac_name",
+        "type": "text",
+        "form": {
+            "id": "login_form",
+            "name": ""
+        },
+        "src": "",
+        "id": "__ac_name",
+        "title": "",
+        "options": [],
+        "label": "Login Name"
+    },
+    "text": ""
+}, {
+    "type": 2,
+    "info": {
+        "tagName": "INPUT",
+        "value": "password",
+        "checked": false,
+        "name": "__ac_password",
+        "type": "password",
+        "form": {
+            "id": "login_form",
+            "name": ""
+        },
+        "src": "",
+        "id": "__ac_password",
+        "title": "",
+        "options": [],
+        "label": "Password"
+    },
+    "text": ""
+}, {
+    "type": 20,
+    "info": {
+        "tagName": "INPUT",
+        "value": "Log in",
+        "checked": false,
+        "name": "submit",
+        "type": "submit",
+        "form": {
+            "id": "login_form",
+            "name": ""
+        },
+        "src": "",
+        "id": "",
+        "title": "",
+        "options": []
+    },
+    "x": 667,
+    "y": 176,
+    "text": ""
+}, {
+    "type": 1,
+    "info": {
+        "tagName": "INPUT",
+        "value": "Log in",
+        "checked": false,
+        "name": "submit",
+        "type": "submit",
+        "form": {
+            "id": "login_form",
+            "name": ""
+        },
+        "src": "",
+        "id": "",
+        "title": "",
+        "options": []
+    },
+    "text": ""
+}, {
+    "type": 4,
+    "info": {
+        "action": "http://127.0.0.1:8080/Plone/login_form",
+        "method": "post",
+        "tagName": "FORM",
+        "name": "",
+        "id": "login_form",
+        "title": "",
+        "options": []
+    },
+    "text": "Login Name\n\n                        \n\n                        \n\n                        \n\n                \n\n                \n\n                        Password"
+}]

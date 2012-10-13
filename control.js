@@ -44,7 +44,7 @@ function RecorderUI() {
             });
 	    }
 	});
-  
+
 }
 
 RecorderUI.prototype.start = function() {
@@ -57,7 +57,7 @@ RecorderUI.prototype.start = function() {
     }
     ui.set_started()
     ui.recorder.start(url);
-  
+
     return false;
 }
 
@@ -154,4 +154,5 @@ window.onload = function(){
     document.querySelector('input#bcancelcomment').onclick=function() {ui.hidecomment(false); return false;};
     document.querySelector('#tagline').onclick=function() {this.innerText='Omne phantasma resurrectionem suam promit.'};
     ui = new RecorderUI();
+    document.querySelector('input#selenium_test_data').onclick=function() {chrome.tabs.create({url: "./selenium_with_test_data.html"})};
 }
