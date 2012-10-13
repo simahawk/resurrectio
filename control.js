@@ -93,6 +93,8 @@ RecorderUI.prototype.set_stopped = function() {
 	e.style.display = 'none';
 	e = document.getElementById("bexport");
 	e.style.display = '';
+  e = document.getElementById("bdoc");
+  e.style.display = '';
   e = document.getElementById("bsel");
   e.style.display = '';
 }
