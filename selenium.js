@@ -59,7 +59,7 @@ SeleniumRenderer.prototype.pyout = function(text) {
 
 SeleniumRenderer.prototype.pyrepr = function(text) {
   // todo: handle non--strings & quoting
-  return "'" + text + "'";
+  return JSON.stringify(text);
 }
 
 SeleniumRenderer.prototype.space = function() {
@@ -106,7 +106,7 @@ SeleniumRenderer.prototype.render = function() {
 
     if(i===0) {
         if(item.type!=etypes.OpenUrl) {
-            this.text("ERROR: the recorded sequence does not start with a url openning.");
+            this.pyout("# ERROR: the recorded sequence does not start with a url openning.");
         } else {
             this.startUrl(item);
             continue;
@@ -158,17 +158,32 @@ SeleniumRenderer.prototype.render = function() {
 
 SeleniumRenderer.prototype.writeHeader = function() {
   var date = new Date();
-  this.text("//==============================================================================");
-  this.text("// Selenium generated " + date);
-  this.text("//==============================================================================");
+  this.text("#==============================================================================");
+  this.text("# Selenium generated " + date);
+  this.text("#==============================================================================");
   this.space();
-  this.stmt("var x = require('selenium').selectXPath;");
-  this.stmt("var selenium = require('selenium').create();");
+  this.stmt("from selenium.webdriver.support.ui import WebDriverWait");
+  this.stmt("from selenium.webdriver.remote.command import Command");
+  this.space();
+  this.stmt("def find(selenium, selector, type='x'):");
+  this.stmt("    method = 'find_element_by_' + {'n': 'name', 'x':'xpath'}[type]");
+  this.stmt("    func = lambda driver: getattr(driver, method)(selector)");
+  this.stmt("    return WebDriverWait(selenium, 3).until(func)");
+  this.space();
+  this.stmt("def test_something(selenium):");
 }
+
 SeleniumRenderer.prototype.writeFooter = function() {
   this.space();
-  this.stmt("DONE");
+  this.stmt("if __name__ == '__main__':");
+  this.stmt("    try:");
+  this.stmt("        from selenium import webdriver");
+  this.stmt("        selenium = webdriver.Firefox()");
+  this.stmt("        test_something(selenium)");
+  this.stmt("    finally:");
+  this.stmt("        selenium.close()");
 }
+
 SeleniumRenderer.prototype.rewriteUrl = function(url) {
   return url;
 }
@@ -179,8 +194,8 @@ SeleniumRenderer.prototype.shortUrl = function(url) {
 
 SeleniumRenderer.prototype.startUrl = function(item) {
   var url = this.pyrepr(this.rewriteUrl(item.url));
-  this.stmt("selenium.options.viewportSize = {width: "+item.width+", height: "+item.height+"};");
-  this.stmt("selenium.start(" + url + ");");
+  this.pyout("selenium.set_window_size("+item.width+", "+item.height+")");
+  this.pyout("selenium.get(" + url + ")");
 }
 SeleniumRenderer.prototype.openUrl = function(item) {
 
@@ -214,15 +229,15 @@ SeleniumRenderer.prototype.getSelector = function(item) {
   var tag = item.info.tagName.toLowerCase();
   var selector;
   if ((type == "submit" || type == "button") && item.info.value)
-    selector = tag+'[type='+type+'][value='+this.pyrepr(this.normalizeWhitespace(item.info.value))+']';
+    selector = tag+'[@type='+this.pyrepr(type)+' and @value='+this.pyrepr(this.normalizeWhitespace(item.info.value))+']';
   else if (item.info.name)
-    selector = tag+'[name='+this.pyrepr(item.info.name)+']';
+    selector = tag+'[@name='+this.pyrepr(item.info.name)+']';
   else if (item.info.id)
     selector = tag+'#'+item.info.id;
   else
     selector = 'TODO';
 
-  return selector;
+  return '//' + selector;
 }
 
 SeleniumRenderer.prototype.getSelectorXPath = function(item) {
@@ -267,61 +282,37 @@ SeleniumRenderer.prototype.mousedrag = function(item) {
 SeleniumRenderer.prototype.click = function(item) {
   var tag = item.info.tagName.toLowerCase();
   if(!(tag == 'a' || tag == 'input' || tag == 'button')) {
-    this.stmt('    self.driver.click('+ item.x + ', '+ item.y +');');
+    this.pyout("bodyid = selenium.find_element_by_xpath('//body').id");
+    this.pyout("selenium.execute(Command.MOVE_TO, {'xoffset': " + item.x + ", 'yoffset': " + item.y + ", 'element':bodyid})");
+    this.pyout("execute(Command.CLICK, {'button': 0})");
   } else {
     var selector;
     if (tag == 'a') {
-      selector = '"//a['+this.getLinkXPath(item)+']"';
+      selector = '//a['+this.getLinkXPath(item)+']';
     } else if (tag == 'input' || tag == 'button') {
-      selector = this.getFormSelector(item) + ' ' + this.getSelector(item);
-      selector = '"' + selector + '"';
+      selector = this.getSelector(item);
     }
-    this.stmt('    self.driver.click('+ selector + ');');
+    this.pyout('element = find(selenium, ' + this.pyrepr(selector) + ')');
+    this.pyout('element.click()');
   }
-}
-
-SeleniumRenderer.prototype.getFormSelector = function(item) {
-    var info = item.info;
-    if(!info.form) {
-        return 'form';
-    }
-    if(info.form.name) {
-        return "form[name=" + info.form.name + "]";
-    } else if(info.form.id) {
-        return "form#" + info.form.id;
-    } else {
-        return "form";
-    }
 }
 
 SeleniumRenderer.prototype.change = function(item) {
   var type = item.info.type;
   if(!item.info.name || item.info.name=='') {
       var path = this.getSelector(item);
-      var name = "unamed_field_"+this.unamed_element_id;
-      item.info.name = name;
-      this.unamed_element_id = this.unamed_element_id + 1;
-      this.stmt('selenium.waitForSelector('+path+', function() {');
-      this.stmt('    selenium.evaluate(function() {');
-      this.stmt('        var element = document.querySelectorAll('+path+')[0];');
-      this.stmt('        element.name="'+name+'";');
-      this.stmt('    });');
-      this.stmt('});');
+      this.pyout('element = find(selenium, ' + this.pyrepr(path) + '))');
+  } else {
+      this.pyout('element = find(selenium, ' + this.pyrepr(item.info.name) + ', type="n")');
   }
   var value = this.pyrepr(item.info.value);
-  this.stmt('selenium.waitForSelector("' + this.getFormSelector(item) + '",');
-  this.stmt('    function success() {');
-  this.stmt('        this.fill("' + this.getFormSelector(item) + '", {"' + item.info.name + '": "'+ item.info.value +'"});');
-  this.stmt('    },');
-  this.stmt('    function fail() {');
-  this.stmt('        this.test.assertExists("' + this.getFormSelector(item) + '");')
-  this.stmt('});');
+  this.pyout('element.send_keys(' + value + ');');
 }
 
 SeleniumRenderer.prototype.submit = function(item) {
   // the submit has been called somehow (user, or script)
   // so no need to trigger it.
-  this.stmt("// submit form");
+  this.pyout("# submit form");
 }
 
 SeleniumRenderer.prototype.screenShot = function(item) {
@@ -359,7 +350,7 @@ SeleniumRenderer.prototype.checkPageLocation = function(item) {
 }
 
 SeleniumRenderer.prototype.checkTextPresent = function(item) {
-    var selector = 'x("//*[contains(text(), '+this.pyrepr(item.text)+')]")';
+    var selector = '//*[contains(text(), '+this.pyrepr(item.text)+')]';
     this.waitAndTestSelector(selector);
 }
 
@@ -373,12 +364,12 @@ SeleniumRenderer.prototype.checkValue = function(item) {
       selected = '@checked'
     else
       selected = 'not(@checked)'
-    selector = 'x("//input[' + way + ' and ' +selected+ ']")';
+    selector = '//input[' + way + ' and ' +selected+ ']';
   }
   else {
     var value = this.pyrepr(item.info.value)
     var tag = item.info.tagName.toLowerCase();
-    selector = 'x("//'+tag+'[' + way + ' and @value='+value+']")';
+    selector = '//'+tag+'[' + way + ' and @value='+value+']"';
   }
   this.waitAndTestSelector(selector);
 }
@@ -386,9 +377,9 @@ SeleniumRenderer.prototype.checkValue = function(item) {
 SeleniumRenderer.prototype.checkText = function(item) {
   var selector = '';
   if ((item.info.type == "submit") || (item.info.type == "button")) {
-      selector = 'x("//input[@value='+this.pyrepr(item.text)+']")';
+      selector = '//input[@value='+this.pyrepr(item.text)+']';
   } else {
-      selector = 'x("//*[normalize-space(text())='+this.pyrepr(item.text)+']")';
+      selector = '//*[normalize-space(text())='+this.pyrepr(item.text)+']';
   }
   this.waitAndTestSelector(selector);
 }
@@ -397,26 +388,26 @@ SeleniumRenderer.prototype.checkHref = function(item) {
     var selector = this.getLinkXPath(item);
     var href = this.pyrepr(this.shortUrl(item.info.href));
     this.stmt('selenium.then(function() {');
-    this.stmt('    this.test.assertExists(x("//a[' + way + ' and @href='+ href +']"));');
+    this.stmt('    this.test.assertExists(//a[' + way + ' and @href='+ href +']);');
     this.stmt('});');
 }
 
 SeleniumRenderer.prototype.checkEnabled = function(item) {
       var way = this.getSelectorXPath(item);
       var tag = item.info.tagName.toLowerCase();
-      this.waitAndTestSelector('x("//'+tag+'[' + way + ' and not(@disabled)]")');
+      this.waitAndTestSelector('//'+tag+'[' + way + ' and not(@disabled)]');
 }
 
 SeleniumRenderer.prototype.checkDisabled = function(item) {
   var way = this.getSelectorXPath(item);
   var tag = item.info.tagName.toLowerCase();
-  this.waitAndTestSelector('x("//'+tag+'[' + way + ' and @disabled]")');
+  this.waitAndTestSelector('//'+tag+'[' + way + ' and @disabled]');
 }
 
 SeleniumRenderer.prototype.checkSelectValue = function(item) {
   var value = this.pyrepr(item.info.value);
   var way = this.getSelectorXPath(item);
-  this.waitAndTestSelector('x("//select[' + way + ']/options[@selected and @value='+value+']")');
+  this.waitAndTestSelector('//select[' + way + ']/options[@selected and @value='+value+']');
 }
 
 SeleniumRenderer.prototype.checkSelectOptions = function(item) {
@@ -425,17 +416,11 @@ SeleniumRenderer.prototype.checkSelectOptions = function(item) {
 
 SeleniumRenderer.prototype.checkImageSrc = function(item) {
     var src = this.pyrepr(this.shortUrl(item.info.src));
-    this.waitAndTestSelector('x("//img[@src=' + src + ']")');
+    this.waitAndTestSelector('//img[@src=' + src + ']');
 }
 
 SeleniumRenderer.prototype.waitAndTestSelector = function(selector) {
-    this.stmt('selenium.waitForSelector(' + selector + ',');
-    this.stmt('    function success() {');
-    this.stmt('        this.test.assertExists(' + selector + ');')
-    this.stmt('      },');
-    this.stmt('    function fail() {');
-    this.stmt('        this.test.assertExists(' + selector + ');')
-    this.stmt('});');
+    this.pyout('element = find(selenium, ' + this.pyrepr(selector) + ')');
 }
 var dt = new SeleniumRenderer(document);
 window.onload = function onpageload() {
